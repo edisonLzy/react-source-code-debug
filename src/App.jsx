@@ -12,37 +12,14 @@ import EventDemo from "./components/EventDemo";
 import ContextDemo from "./components/Context";
 import './App.css';
 
-// propsDiff
-/*class App extends React.Component {
-  render() {
-    return <PropsDiff/>
-  }
-}*/
 function App() {
-
-  // 事件系统
-  // return <EventDemo/>
-
-  // return <Hooks/>
-  // fiber树
-  // return (
-  //   <div className="App">
-  //     <span className={'app-span'} onClick={() => setCount(count + 1)}>App{count}</span>
-  //     <AppSibling count={count}/>
-  //   </div>
-  // );
-
-  // Scheduler调度任务与用户交互
-  // return <SchedulerTask/>
-
-  // 高优先级插队
-  // return <TasksWithDifferentPriorities/>
-
-  // context
-  return <ContextDemo/>
-
-  // diff 算法
-  // return <Diff ref={'diffRef'}/>
+  const [count, setCount] = useState(0);
+  const [count2, setCount2] = useState(0);
+  debugger
+  return <h1 onClick={()=>{
+    setCount(count+1)
+    setCount2(count2+1)
+  }}> hello </h1>
 }
 
 export default App;

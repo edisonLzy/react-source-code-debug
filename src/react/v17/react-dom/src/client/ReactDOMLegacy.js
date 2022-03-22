@@ -179,6 +179,7 @@ function legacyRenderSubtreeIntoContainer(
   forceHydrate: boolean,
   callback: ?Function,
 ) {
+
   if (__DEV__) {
     topLevelUpdateWarnings(container);
     warnOnInvalidCallback(callback === undefined ? null : callback, 'render');
@@ -194,6 +195,8 @@ function legacyRenderSubtreeIntoContainer(
       container,
       forceHydrate,
     );
+    console.log(root);
+    // 初始化 fiber 的根
     fiberRoot = root._internalRoot;
     if (typeof callback === 'function') {
       const originalCallback = callback;
