@@ -399,6 +399,7 @@ function ChildReconciler(shouldTrackSideEffects) {
   ): Fiber {
     if (current !== null) {
       if (
+        // 多节点diff: key 和 type 都相同 复用 fiber
         current.elementType === element.type ||
         // Keep this check inline so it only runs on the false path:
         (__DEV__ ? isCompatibleFamilyForHotReloading(current, element) : false)
@@ -587,6 +588,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE: {
           if (newChild.key === key) {
+            // 多节点diff:key 相同 
             if (newChild.type === REACT_FRAGMENT_TYPE) {
               return updateFragment(
                 returnFiber,
@@ -598,6 +600,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             }
             return updateElement(returnFiber, oldFiber, newChild, lanes);
           } else {
+            // 多节点diff: key 不相同 返回null 用于跳出第一次循环
             return null;
           }
         }
@@ -761,6 +764,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     return knownKeys;
   }
 
+  // 多节点 diff
   function reconcileChildrenArray(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
