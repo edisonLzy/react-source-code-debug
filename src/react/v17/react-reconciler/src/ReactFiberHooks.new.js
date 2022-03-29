@@ -1151,6 +1151,7 @@ function mountState<S>(
 function updateState<S>(
   initialState: (() => S) | S,
 ): [S, Dispatch<BasicStateAction<S>>] {
+  debugger
   return updateReducer(basicStateReducer, (initialState: any));
 }
 
