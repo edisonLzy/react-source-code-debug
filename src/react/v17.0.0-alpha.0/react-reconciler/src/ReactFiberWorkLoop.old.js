@@ -1575,6 +1575,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
   // If the root or lanes have changed, throw out the existing stack
   // and prepare a fresh one. Otherwise we'll continue where we left off.
   if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
+    // 创建 workinProgress fiber
     prepareFreshStack(root, lanes);
     startWorkOnPendingInteractions(root, lanes);
   }

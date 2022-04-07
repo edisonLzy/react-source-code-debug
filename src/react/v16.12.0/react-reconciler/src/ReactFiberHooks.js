@@ -916,7 +916,6 @@ function updateRef<T>(initialValue: T): {|current: T|} {
   const hook = updateWorkInProgressHook();
   return hook.memoizedState;
 }
-
 function mountEffectImpl(fiberEffectTag, hookEffectTag, create, deps): void {
   const hook = mountWorkInProgressHook();
   const nextDeps = deps === undefined ? null : deps;
