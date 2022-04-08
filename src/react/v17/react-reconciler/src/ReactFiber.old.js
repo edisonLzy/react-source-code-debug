@@ -599,6 +599,7 @@ export function createFiberFromElement(
   }
   const type = element.type;
   const key = element.key;
+  // react 元素的 props将作为 fiber.pendingProps保存
   const pendingProps = element.props;
   const fiber = createFiberFromTypeAndProps(
     type,

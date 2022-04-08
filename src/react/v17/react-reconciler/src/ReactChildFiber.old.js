@@ -864,6 +864,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // If we don't have any more existing children we can choose a fast path
       // since the rest will all be insertions.
       for (; newIdx < newChildren.length; newIdx++) {
+        // 根据数组的每一个react元素创建子fiber
         const newFiber = createChild(returnFiber, newChildren[newIdx], lanes);
         if (newFiber === null) {
           continue;
@@ -871,8 +872,11 @@ function ChildReconciler(shouldTrackSideEffects) {
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
         if (previousNewFiber === null) {
           // TODO: Move out of the loop. This only happens for the first run.
+          // 记录第一个孩子
           resultingFirstChild = newFiber;
         } else {
+          // 构建孩子之间的兄弟节点的关系 fiber.sibling
+          // previousNewFiber始终指向最新创建的fiber节点
           previousNewFiber.sibling = newFiber;
         }
         previousNewFiber = newFiber;
@@ -1140,6 +1144,7 @@ function ChildReconciler(shouldTrackSideEffects) {
   ): Fiber {
     const key = element.key;
     let child = currentFirstChild;
+    // 如果 current树上的fiber节点的child存在则进入diff阶段
     while (child !== null) {
       // TODO: If key === null and child.key === null, then this only applies to
       // the first item in the list.
@@ -1342,7 +1347,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         ),
       );
     }
-
+    // 子元素为数组的情况
     if (isArray(newChild)) {
       return reconcileChildrenArray(
         returnFiber,

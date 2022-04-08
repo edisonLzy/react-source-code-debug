@@ -1133,6 +1133,8 @@ function updateHostComponent(
   }
 
   const type = workInProgress.type;
+  // 在创建 react元素的fiber节点的时候
+  // fiber.pendingProps = element.props
   const nextProps = workInProgress.pendingProps;
   const prevProps = current !== null ? current.memoizedProps : null;
 
@@ -1414,6 +1416,7 @@ function mountIndeterminateComponent(
     );
     setIsRendering(false);
   } else {
+    // 这里的value就是 函数组件返回的 react元素
     value = renderWithHooks(
       null,
       workInProgress,

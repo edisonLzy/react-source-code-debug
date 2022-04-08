@@ -195,7 +195,6 @@ function legacyRenderSubtreeIntoContainer(
       container,
       forceHydrate,
     );
-    console.log(root);
     // 初始化 fiber 的根
     fiberRoot = root._internalRoot;
     if (typeof callback === 'function') {

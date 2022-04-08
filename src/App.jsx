@@ -19,7 +19,6 @@ function App () {
       <h1
         key={count}
         onClick={() => {
-          debugger
           setCount(v => v + 1)
         }}
       >

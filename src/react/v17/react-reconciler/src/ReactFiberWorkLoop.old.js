@@ -675,6 +675,7 @@ function markUpdateLaneFromFiberToRoot(
   // 获取现有fiber的alternate，通过alternate是否为null，来区分是否是更新过程
   let alternate = sourceFiber.alternate;
   if (alternate !== null) {
+    // 如果是更新阶段,也会更新对应 alternate上的lanes
     alternate.lanes = mergeLanes(alternate.lanes, lane);
   }
   if (__DEV__) {
@@ -690,6 +691,7 @@ function markUpdateLaneFromFiberToRoot(
   let node = sourceFiber;
   let parent = sourceFiber.return;
   while (parent !== null) {
+    // 将当前更新的lane 合并到 当前fiber祖先fiber上
     parent.childLanes = mergeLanes(parent.childLanes, lane);
     alternate = parent.alternate;
     if (alternate !== null) {
@@ -705,6 +707,7 @@ function markUpdateLaneFromFiberToRoot(
     parent = parent.return;
   }
   if (node.tag === HostRoot) {
+    // 如果是 fiber是 HostRoot 则返回 fiberRoot
     const root: FiberRoot = node.stateNode;
     return root;
   } else {
