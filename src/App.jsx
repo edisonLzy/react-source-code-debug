@@ -17,17 +17,14 @@ function App () {
   return (
     <div className='App'>
       <h1
-        key={count}
         onClick={() => {
           setCount(v => v + 1)
         }}
       >
         {count}
       </h1>
-      <p>我是第一段话</p>
-      <p>我是第二段话</p>
     </div>
   )
 }
 
-export default App
+export default Hooks

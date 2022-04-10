@@ -1370,6 +1370,7 @@ export function popRenderLanes(fiber: Fiber) {
 }
 
 function prepareFreshStack(root: FiberRoot, lanes: Lanes) {
+  // 初始化 workInProgress tree
   root.finishedWork = null;
   root.finishedLanes = NoLanes;
 
@@ -1813,6 +1814,8 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
         // list. PerformedWork effect is read by React DevTools but shouldn't be
         // committed.
         if (flags > PerformedWork) {
+          // 更新阶段: 如果完成工作的fiber 存在副作用
+          // 比如 更新 flags会被 标记为 Update,则将fiber的副作用合并到 父fiber的effectList上
           if (returnFiber.lastEffect !== null) {
             returnFiber.lastEffect.nextEffect = completedWork;
           } else {
@@ -2102,6 +2105,7 @@ function commitRootImpl(root, renderPriorityLevel) {
         }
       } else {
         try {
+          // commit阶段: 
           commitBeforeMutationEffects();
         } catch (error) {
           invariant(nextEffect !== null, 'Should be working on an effect.');
@@ -2448,6 +2452,7 @@ function commitMutationEffects(
       }
       case Update: {
         const current = nextEffect.alternate;
+        // commit阶段: 处理 被标记为 Update 的fiber
         commitWork(current, nextEffect);
         break;
       }

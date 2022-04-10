@@ -1530,6 +1530,7 @@ function commitWork(current: Fiber | null, finishedWork: Fiber): void {
       return;
     }
     case HostComponent: {
+      // commit阶段: 处理 真实DOM的更新
       const instance: Instance = finishedWork.stateNode;
       if (instance != null) {
         // Commit the work prepared earlier.
@@ -1540,9 +1541,11 @@ function commitWork(current: Fiber | null, finishedWork: Fiber): void {
         const oldProps = current !== null ? current.memoizedProps : newProps;
         const type = finishedWork.type;
         // TODO: Type the updateQueue to be specific to host components.
+        // commit阶段: 这里获取到 beginWork中completeWork中调用prepareUpdate获取得到的更新属性以及对应的值
         const updatePayload: null | UpdatePayload = (finishedWork.updateQueue: any);
         finishedWork.updateQueue = null;
         if (updatePayload !== null) {
+          // commit阶段: 提交更新
           commitUpdate(
             instance,
             updatePayload,

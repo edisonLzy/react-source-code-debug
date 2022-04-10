@@ -360,6 +360,7 @@ function updateForwardRef(
     }
     setIsRendering(false);
   } else {
+    // 更新阶段: 调用函数组件得到的新的react 元素
     nextChildren = renderWithHooks(
       current,
       workInProgress,
@@ -377,6 +378,7 @@ function updateForwardRef(
 
   // React DevTools reads this flag.
   workInProgress.flags |= PerformedWork;
+  // 更新阶段: 开始调和子 fiber
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
 }
@@ -885,7 +887,7 @@ function updateClassComponent(
     hasContext = false;
   }
   prepareToReadContext(workInProgress, renderLanes);
-
+  // 类组件的stateNode为组件的实例
   const instance = workInProgress.stateNode;
   let shouldUpdate;
   if (instance === null) {
@@ -1142,6 +1144,8 @@ function updateHostComponent(
   const isDirectTextChild = shouldSetTextContent(type, nextProps);
 
   if (isDirectTextChild) {
+    // 如果当前 fiber的children只有一个孩子并且是文本得情况
+    // 则表示当前 fiber完成,进入 compeleteWork阶段
     // We special case a direct text child of a host node. This is a common
     // case. We won't handle it as a reified child. We will instead handle
     // this in the host environment that also has access to this prop. That
@@ -3296,6 +3300,7 @@ function beginWork(
           return updateOffscreenComponent(current, workInProgress, renderLanes);
         }
       }
+      // 更新阶段: 为什么 rootFiber会走到这个逻辑
       return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
     } else {
       if ((current.flags & ForceUpdateForLegacySuspense) !== NoFlags) {

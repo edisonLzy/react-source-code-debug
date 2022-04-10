@@ -228,10 +228,13 @@ if (supportsMutation) {
       currentHostContext,
     );
     // TODO: Type this specific to this type of component.
+    // 更新阶段: 更新 fiber.updateQueue
+    // updatePayload为更新的属性以及值
     workInProgress.updateQueue = (updatePayload: any);
     // If the update payload indicates that there is a change or if there
     // is a new ref we mark this as an update. All the work is done in commitWork.
     if (updatePayload) {
+      // 更新阶段: 将fiber添加 Update的flags
       markUpdate(workInProgress);
     }
   };
@@ -260,7 +263,7 @@ if (supportsMutation) {
     let node = workInProgress.child;
     while (node !== null) {
       // eslint-disable-next-line no-labels
-      branches: if (node.tag === HostComponent) {
+      if (node.tag === HostComponent) {
         let instance = node.stateNode;
         if (needsVisibilityToggle && isHidden) {
           // This child is inside a timed out tree. Hide it.
@@ -354,7 +357,7 @@ if (supportsMutation) {
     let node = workInProgress.child;
     while (node !== null) {
       // eslint-disable-next-line no-labels
-      branches: if (node.tag === HostComponent) {
+      if (node.tag === HostComponent) {
         let instance = node.stateNode;
         if (needsVisibilityToggle && isHidden) {
           // This child is inside a timed out tree. Hide it.

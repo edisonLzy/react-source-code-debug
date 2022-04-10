@@ -1655,6 +1655,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   // The current, flushed, state of this fiber is the alternate. Ideally
   // nothing should rely on this, but relying on it here means that we don't
   // need an additional field on the work in progress.
+  // 获取 workInProgress fiber 对应的current fiber
   const current = unitOfWork.alternate;
   setCurrentDebugFiberInDEV(unitOfWork);
 

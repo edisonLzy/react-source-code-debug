@@ -937,6 +937,7 @@ function resumeMountClassInstance(
       typeof instance.componentWillReceiveProps === 'function')
   ) {
     if (oldProps !== newProps || oldContext !== nextContext) {
+      // 生命周期: componentWillReceiveProps 是在renderer阶段 可能会被打断
       callComponentWillReceiveProps(
         workInProgress,
         instance,
@@ -975,7 +976,7 @@ function resumeMountClassInstance(
     );
     newState = workInProgress.memoizedState;
   }
-
+  // 类组件更新: 检查是否需要更新 
   const shouldUpdate =
     checkHasForceUpdateAfterProcessing() ||
     checkShouldComponentUpdate(
@@ -1158,6 +1159,7 @@ function updateClassInstance(
         instance.UNSAFE_componentWillUpdate(newProps, newState, nextContext);
       }
     }
+    // 类组件更新: 如果组件存在 componentDidUpdate 生命周期,则打上 Update的flags用于在commit阶段调用
     if (typeof instance.componentDidUpdate === 'function') {
       workInProgress.flags |= Update;
     }

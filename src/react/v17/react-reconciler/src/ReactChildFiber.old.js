@@ -1430,8 +1430,11 @@ export function cloneChildFibers(
     return;
   }
 
+  
   let currentChild = workInProgress.child;
   let newChild = createWorkInProgress(currentChild, currentChild.pendingProps);
+  // App -> div(workInpProgress)
+  // div(workInpProgress) <-alternate-> div(current)
   workInProgress.child = newChild;
 
   newChild.return = workInProgress;

@@ -851,6 +851,8 @@ export function diffProperties(
     } else {
       // For any other property we always add it to the queue and then we
       // filter it out using the allowed property list during the commit.
+      // 更新阶段: 将有变化的属性存放到 updatePayload中,这个数组存放的变化的属性以及变化后的值
+      // 结构: [propKey,newValue,propKey,newValue]
       (updatePayload = updatePayload || []).push(propKey, nextProp);
     }
   }
@@ -864,6 +866,7 @@ export function diffProperties(
 }
 
 // Apply the diff.
+// commit阶段: 使用 updatePayload ,更新真实DOM
 export function updateProperties(
   domElement: Element,
   updatePayload: Array<any>,
@@ -885,6 +888,7 @@ export function updateProperties(
   const wasCustomComponentTag = isCustomComponent(tag, lastRawProps);
   const isCustomComponentTag = isCustomComponent(tag, nextRawProps);
   // Apply the diff.
+  // commit阶段: 使用 updatePayload ,更新真实DOM
   updateDOMProperties(
     domElement,
     updatePayload,

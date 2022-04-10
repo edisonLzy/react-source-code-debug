@@ -338,6 +338,7 @@ export function prepareUpdate(
       validateDOMNesting(null, string, ownAncestorInfo);
     }
   }
+  // 更新阶段: 更新dom信息
   return diffProperties(
     domElement,
     type,

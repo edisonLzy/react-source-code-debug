@@ -1136,6 +1136,7 @@ function updateHostComponent(
 
   const type = workInProgress.type;
   const nextProps = workInProgress.pendingProps;
+  // 获取 current上对应的 props
   const prevProps = current !== null ? current.memoizedProps : null;
 
   let nextChildren = nextProps.children;
