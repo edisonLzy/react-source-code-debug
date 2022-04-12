@@ -10,6 +10,7 @@ import PropsDiff from './components/PropsDiff'
 import Hooks from './components/Hooks'
 import EventDemo from './components/EventDemo'
 import ContextDemo from './components/Context'
+import MemoryLink from './components/MemeoryLeak'
 import './App.css'
 
 function App () {
@@ -27,4 +28,4 @@ function App () {
   )
 }
 
-export default Hooks
+export default MemoryLink

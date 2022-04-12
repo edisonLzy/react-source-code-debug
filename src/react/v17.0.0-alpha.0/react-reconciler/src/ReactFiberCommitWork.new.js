@@ -865,7 +865,6 @@ function commitUnmount(
         const lastEffect = updateQueue.lastEffect;
         if (lastEffect !== null) {
           const firstEffect = lastEffect.next;
-
           let effect = firstEffect;
           do {
             const {destroy, tag} = effect;

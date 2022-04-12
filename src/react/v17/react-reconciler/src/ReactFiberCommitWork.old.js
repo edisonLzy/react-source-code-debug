@@ -891,6 +891,7 @@ function commitUnmount(
             const {destroy, tag} = effect;
             if (destroy !== undefined) {
               if ((tag & HookPassive) !== NoHookEffect) {
+                // 删除节点: 将 useEffect的 destroy函数存放到 pendingPassiveHookEffectsUnmount
                 enqueuePendingPassiveHookEffectUnmount(current, effect);
               } else {
                 if (

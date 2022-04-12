@@ -2492,6 +2492,7 @@ function commitMutationEffects(
 ) {
   let fiber = firstChild;
   while (fiber !== null) {
+    // 删除节点
     const deletions = fiber.deletions;
     if (deletions !== null) {
       commitMutationEffectsDeletions(deletions, root, renderPriorityLevel);
@@ -2623,6 +2624,7 @@ function commitMutationEffectsDeletions(
       }
     } else {
       try {
+        // 删除节点的入口
         commitDeletion(root, childToDelete, renderPriorityLevel);
       } catch (error) {
         captureCommitPhaseError(childToDelete, error);

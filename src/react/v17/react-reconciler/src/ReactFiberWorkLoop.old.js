@@ -678,7 +678,7 @@ function markUpdateLaneFromFiberToRoot(
     // 如果是更新阶段,也会更新对应 alternate上的lanes
     alternate.lanes = mergeLanes(alternate.lanes, lane);
   }
-  if (__DEV__) {
+  if (true) {
     if (
       alternate === null &&
       (sourceFiber.flags & (Placement | Hydrating)) !== NoFlags
@@ -690,6 +690,7 @@ function markUpdateLaneFromFiberToRoot(
   // 从产生更新的fiber节点开始，向上收集childLanes
   let node = sourceFiber;
   let parent = sourceFiber.return;
+  // warnAboutUpdateOnNotYetMountedFiberInDE: 如果当前fiber已经被卸载则其 return指针为null,所以会抛出 warnAboutUpdateOnNotYetMountedFiberInDEV
   while (parent !== null) {
     // 将当前更新的lane 合并到 当前fiber祖先fiber上
     parent.childLanes = mergeLanes(parent.childLanes, lane);
@@ -697,7 +698,7 @@ function markUpdateLaneFromFiberToRoot(
     if (alternate !== null) {
       alternate.childLanes = mergeLanes(alternate.childLanes, lane);
     } else {
-      if (__DEV__) {
+      if (true) {
         if ((parent.flags & (Placement | Hydrating)) !== NoFlags) {
           warnAboutUpdateOnNotYetMountedFiberInDEV(sourceFiber);
         }
@@ -3133,7 +3134,7 @@ function warnAboutUpdateOnNotYetMountedFiberInDEV(fiber) {
 
 let didWarnStateUpdateForUnmountedComponent: Set<string> | null = null;
 function warnAboutUpdateOnUnmountedFiberInDEV(fiber) {
-  if (__DEV__) {
+  if (true) {
     const tag = fiber.tag;
     if (
       tag !== HostRoot &&

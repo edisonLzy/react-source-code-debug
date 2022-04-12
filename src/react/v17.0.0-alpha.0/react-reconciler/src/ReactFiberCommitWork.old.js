@@ -1410,6 +1410,7 @@ function unmountHostComponents(
   }
 }
 
+// 删除节点
 function commitDeletion(
   finishedRoot: FiberRoot,
   current: Fiber,
