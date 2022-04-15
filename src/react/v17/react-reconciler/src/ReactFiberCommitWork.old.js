@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 /**
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
@@ -873,13 +874,13 @@ function commitUnmount(
   renderPriorityLevel: ReactPriorityLevel,
 ): void {
   onCommitUnmount(current);
-
   switch (current.tag) {
     case FunctionComponent:
     case ForwardRef:
     case MemoComponent:
     case SimpleMemoComponent:
     case Block: {
+      // commit阶段删除节点: 卸载 函数组件fiber
       const updateQueue: FunctionComponentUpdateQueue | null = (current.updateQueue: any);
       if (updateQueue !== null) {
         const lastEffect = updateQueue.lastEffect;
@@ -891,7 +892,7 @@ function commitUnmount(
             const {destroy, tag} = effect;
             if (destroy !== undefined) {
               if ((tag & HookPassive) !== NoHookEffect) {
-                // 删除节点: 将 useEffect的 destroy函数存放到 pendingPassiveHookEffectsUnmount
+                // commit阶段删除节点: 将 useEffect的 destroy函数存放到 pendingPassiveHookEffectsUnmount
                 enqueuePendingPassiveHookEffectUnmount(current, effect);
               } else {
                 if (
@@ -1005,7 +1006,7 @@ function commitNestedUnmounts(
     node = node.sibling;
   }
 }
-
+// 
 function detachFiberMutation(fiber: Fiber) {
   // Cut off the return pointers to disconnect it from the tree. Ideally, we
   // should clear the child pointer of the parent alternate to let this
@@ -1285,6 +1286,7 @@ function unmountHostComponents(
   let currentParentIsContainer;
 
   while (true) {
+    // commit阶段删除节点: 1. 找到需要删除节点的父节点(`DOM节 点`)
     if (!currentParentIsValid) {
       let parent = node.return;
       findParent: while (true) {
@@ -1300,6 +1302,7 @@ function unmountHostComponents(
             currentParentIsContainer = false;
             break findParent;
           case HostRoot:
+            // fiberRoot取容器节点
             currentParent = parentStateNode.containerInfo;
             currentParentIsContainer = true;
             break findParent;
@@ -1317,7 +1320,7 @@ function unmountHostComponents(
       }
       currentParentIsValid = true;
     }
-
+    //  commit阶段删除节点: 如果是原生dom节点 则直接遍历子树卸载子节点  
     if (node.tag === HostComponent || node.tag === HostText) {
       commitNestedUnmounts(finishedRoot, node, renderPriorityLevel);
       // After all the children have unmounted, it is now safe to remove the
@@ -1377,6 +1380,7 @@ function unmountHostComponents(
         );
       }
     } else if (node.tag === HostPortal) {
+      //  commit阶段删除节点: ReactDOM.createPortal(child, container) container节点为父节点
       if (node.child !== null) {
         // When we go into a portal, it becomes the parent to remove from.
         // We will reassign it back when we pop the portal on the way up.
@@ -1388,9 +1392,11 @@ function unmountHostComponents(
         continue;
       }
     } else {
+      //  commit阶段删除节点: 根据不同的 fiber.tag 卸载fiber节点
       commitUnmount(finishedRoot, node, renderPriorityLevel);
       // Visit children because we may find more host components below.
       if (node.child !== null) {
+        //  commit阶段删除节点: 删除子fiber
         node.child.return = node;
         node = node.child;
         continue;

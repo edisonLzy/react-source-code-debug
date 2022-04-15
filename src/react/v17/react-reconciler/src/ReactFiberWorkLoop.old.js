@@ -1568,6 +1568,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
   // If the root or lanes have changed, throw out the existing stack
   // and prepare a fresh one. Otherwise we'll continue where we left off.
   if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
+    // 根据 root.current创建workInProgress
     prepareFreshStack(root, lanes);
     startWorkOnPendingInteractions(root, lanes);
   }
@@ -2458,6 +2459,7 @@ function commitMutationEffects(
         break;
       }
       case Deletion: {
+        // commit阶段: 处理 被标记为 Deletion 的fiber
         commitDeletion(root, nextEffect, renderPriorityLevel);
         break;
       }

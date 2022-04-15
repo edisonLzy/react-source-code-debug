@@ -3360,6 +3360,7 @@ function beginWork(
         renderLanes,
       );
     }
+    // 更新阶段: class组件处理逻辑
     case ClassComponent: {
       const Component = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;

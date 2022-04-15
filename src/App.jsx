@@ -20,6 +20,8 @@ function App () {
       <h1
         onClick={() => {
           setCount(v => v + 1)
+          setCount(v => v + 1)
+          setCount(v => v + 1)
         }}
       >
         {count}

@@ -76,7 +76,7 @@ export function useContext<T>(
   }
   return dispatcher.useContext(Context, unstable_observedBits);
 }
-
+// hooks: useState实现
 export function useState<S>(
   initialState: (() => S) | S,
 ): [S, Dispatch<BasicStateAction<S>>] {
@@ -97,7 +97,7 @@ export function useRef<T>(initialValue: T): {|current: T|} {
   const dispatcher = resolveDispatcher();
   return dispatcher.useRef(initialValue);
 }
-
+// hooks: useEffect实现
 export function useEffect(
   create: () => (() => void) | void,
   deps: Array<mixed> | void | null,

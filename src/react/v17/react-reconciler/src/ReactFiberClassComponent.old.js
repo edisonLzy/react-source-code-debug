@@ -1092,6 +1092,7 @@ function updateClassInstance(
 
   const oldState = workInProgress.memoizedState;
   let newState = (instance.state = oldState);
+  // 更新阶段: 处理 fiber.updateQueue上保存的更新
   processUpdateQueue(workInProgress, newProps, instance, renderLanes);
   newState = workInProgress.memoizedState;
 

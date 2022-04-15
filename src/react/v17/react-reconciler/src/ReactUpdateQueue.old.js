@@ -406,12 +406,18 @@ export function processUpdateQueue<State>(
     currentlyProcessingQueue = queue.shared;
   }
 
+  // 更新阶段: baseUpdate上次更新遗留的 update队列
+  // A -> B -> C
   let firstBaseUpdate = queue.firstBaseUpdate;
   let lastBaseUpdate = queue.lastBaseUpdate;
 
   // Check if there are pending updates. If so, transfer them to the base queue.
+  // 更新阶段: 本次更新产生的update对象队列
   let pendingQueue = queue.shared.pending;
+  // D -> E
   if (pendingQueue !== null) {
+    // 将新产生的更新队列 连接到 遗留的update队列中
+    //  A -> B -> C -> D -> E
     queue.shared.pending = null;
 
     // The pending queue is circular. Disconnect the pointer between first
@@ -450,8 +456,9 @@ export function processUpdateQueue<State>(
 
   // These values may change as we process the queue.
   if (firstBaseUpdate !== null) {
+    // 取到baseState
     // Iterate through the list of updates to compute the result.
-    let newState = queue.baseState;
+    let newState = queue.baseState; // 上次更新过程中已处理的高优先级update处理的结果
     // TODO: Don't need to accumulate this. Instead, we can remove renderLanes
     // from the original lanes.
     let newLanes = NoLanes;
@@ -480,6 +487,7 @@ export function processUpdateQueue<State>(
         };
         if (newLastBaseUpdate === null) {
           newFirstBaseUpdate = newLastBaseUpdate = clone;
+          // 更新阶段: 如果存在低优先级任务被跳过,则 updateQueue.baseState 存储被跳过update之前的update计算出来的state
           newBaseState = newState;
         } else {
           newLastBaseUpdate = newLastBaseUpdate.next = clone;

@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useLayoutEffect } from 'react'
+import { useRef } from 'react'
+import { useMemo } from 'react'
+import { useCallback } from 'react'
 
 const UseEffectExp = () => {
   const [ text, setText ] = useState(0)
+  const cb = useCallback(()=>{},[])
+  const memo = useMemo(()=>{
+      return 1
+  },[])
+  const ref = useRef()
     useEffect(() => {
         console.log('effect1')
         return () => {

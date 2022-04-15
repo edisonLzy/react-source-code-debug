@@ -1425,7 +1425,6 @@ function unmountHostComponents(
   // Note: these two variables *must* always be updated together.
   let currentParent;
   let currentParentIsContainer;
-
   while (true) {
     if (!currentParentIsValid) {
       let parent = node.return;

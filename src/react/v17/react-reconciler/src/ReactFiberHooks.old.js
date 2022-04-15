@@ -471,7 +471,7 @@ export function renderWithHooks<Props, SecondArg>(
     'Rendered fewer hooks than expected. This may be caused by an accidental ' +
       'early return statement.',
   );
-
+  // 渲染阶段: 返回调用函数组件返回的element 
   return children;
 }
 
@@ -556,9 +556,11 @@ function updateWorkInProgressHook(): Hook {
   // use as a base. When we reach the end of the base list, we must switch to
   // the dispatcher used for mounts.
   let nextCurrentHook: null | Hook;
+  // 更新阶段: currentHook始终指向当前正在创建的hook对象的对应的current上的hook对象
   if (currentHook === null) {
     const current = currentlyRenderingFiber.alternate;
     if (current !== null) {
+      // 更新阶段: 获取 current.memoizedState 上的 hook列表
       nextCurrentHook = current.memoizedState;
     } else {
       nextCurrentHook = null;
@@ -668,6 +670,7 @@ function updateReducer<S, I, A>(
   let baseQueue = current.baseQueue;
 
   // The last pending update that hasn't been processed yet.
+  // 更新阶段: 存储着 setState创建的update对象
   const pendingQueue = queue.pending;
   if (pendingQueue !== null) {
     // We have new updates that haven't been processed yet.
@@ -750,9 +753,11 @@ function updateReducer<S, I, A>(
         if (update.eagerReducer === reducer) {
           // If this update was processed eagerly, and its reducer matches the
           // current reducer, we can use the eagerly computed state.
+          // 更新阶段: update.eagerState是在 dispathAction的时候计算的
           newState = ((update.eagerState: any): S);
         } else {
           const action = update.action;
+          // 更新阶段: 计算新的 state
           newState = reducer(newState, action);
         }
       }
@@ -771,6 +776,7 @@ function updateReducer<S, I, A>(
       markWorkInProgressReceivedUpdate();
     }
 
+    // 更新阶段: 存储新的 state
     hook.memoizedState = newState;
     hook.baseState = newBaseState;
     hook.baseQueue = newBaseQueueLast;
@@ -1212,13 +1218,14 @@ function updateEffectImpl(fiberFlags, hookFlags, create, deps): void {
     destroy = prevEffect.destroy;
     if (nextDeps !== null) {
       const prevDeps = prevEffect.deps;
+      // 更新阶段 useEffect: 如果依赖没有发生变化，则 新建一个 没有`HookHasEffect标记`的effect对象,挂载到effect链表中
       if (areHookInputsEqual(nextDeps, prevDeps)) {
         pushEffect(hookFlags, create, destroy, nextDeps);
         return;
       }
     }
   }
-
+  // 更新阶段 useEffect : 如果 deps发生变化,则创建新的effect对象以及effet链表
   currentlyRenderingFiber.flags |= fiberFlags;
 
   hook.memoizedState = pushEffect(
@@ -1659,7 +1666,7 @@ function dispatchAction<S, A>(
 
   const eventTime = requestEventTime();
   const lane = requestUpdateLane(fiber);
-
+  // 触发更新: 创建update对象
   const update: Update<S, A> = {
     lane,
     action,
@@ -1669,6 +1676,7 @@ function dispatchAction<S, A>(
   };
 
   // Append the update to the end of the list.
+  // 触发更新: queue 为 hook对象上的queue
   const pending = queue.pending;
   if (pending === null) {
     // This is the first update. Create a circular list.
@@ -1677,6 +1685,7 @@ function dispatchAction<S, A>(
     update.next = pending.next;
     pending.next = update;
   }
+  // pending始终指向最新的update独享
   queue.pending = update;
 
   const alternate = fiber.alternate;
@@ -1684,6 +1693,7 @@ function dispatchAction<S, A>(
     fiber === currentlyRenderingFiber ||
     (alternate !== null && alternate === currentlyRenderingFiber)
   ) {
+    // 更新阶段: 说明当前fiber正在发生调和渲染更新，那么不需要更新 
     // This is a render phase update. Stash it in a lazily-created map of
     // queue -> linked list of updates. After this render pass, we'll restart
     // and apply the stashed updates on top of the work-in-progress hook.
