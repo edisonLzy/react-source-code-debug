@@ -2988,7 +2988,7 @@ function updateScopeComponent(current, workInProgress, renderLanes) {
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
 }
-
+// 将 didReceiveUpdate 标记为 true表示已经收到了更新
 export function markWorkInProgressReceivedUpdate() {
   didReceiveUpdate = true;
 }
@@ -3011,6 +3011,7 @@ function bailoutOnAlreadyFinishedWork(
   markSkippedUpdateLanes(workInProgress.lanes);
 
   // Check if the children have any pending work.
+  // 更新阶段: 如果 children 没有需要更新的工作则
   if (!includesSomeLane(renderLanes, workInProgress.childLanes)) {
     // The children don't have any work either. We can skip them.
     // TODO: Once we add back resuming, we should check if the children are
@@ -3020,6 +3021,7 @@ function bailoutOnAlreadyFinishedWork(
     // This fiber doesn't have work, but its subtree does. Clone the child
     // fibers and continue.
     cloneChildFibers(current, workInProgress);
+    // 更新阶段: 注意这里的workInProgress.child实际上已经是 clone之后的child了
     return workInProgress.child;
   }
 }

@@ -1,17 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-class Diff extends React.Component {
-    state = {
-        arr: [1, 2]
+
+export default function Diff() {
+    const [list, setList] = useState([{
+        label: '🍎',
+        key: 'apple'
+    },
+    {
+        label: '🍇',
+        key: 'grape'
+    },
+    {
+        label: '🍌',
+        key: 'banana'
     }
-    render() {
-        return <div>
-          {
-              this.state.arr.map(v => {
-                  return <div key={v}>{v}</div>
-              })
-          }
-        </div>
-    }
+    ]);
+    return <div>
+        <ul>
+            {list.map(it => {
+                return <li key={it.key}>
+                    <span>{it.label}</span>
+                </li>
+            })}
+        </ul>
+
+        <button onClick={() => {
+            setList(v => {
+                return [...v].reverse()
+            })
+        }}>shuffle</button>
+    </div>
 }
-export default Diff

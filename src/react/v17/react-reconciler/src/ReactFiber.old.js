@@ -7,20 +7,20 @@
  * @flow
  */
 
-import type {ReactElement} from 'shared/ReactElementType';
+import type { ReactElement } from 'shared/ReactElementType';
 import type {
   ReactFragment,
   ReactPortal,
   ReactFundamentalComponent,
   ReactScope,
 } from 'shared/ReactTypes';
-import type {Fiber} from './ReactInternalTypes';
-import type {RootTag} from './ReactRootTags';
-import type {WorkTag} from './ReactWorkTags';
-import type {TypeOfMode} from './ReactTypeOfMode';
-import type {Lanes} from './ReactFiberLane';
-import type {SuspenseInstance} from './ReactFiberHostConfig';
-import type {OffscreenProps} from './ReactFiberOffscreenComponent';
+import type { Fiber } from './ReactInternalTypes';
+import type { RootTag } from './ReactRootTags';
+import type { WorkTag } from './ReactWorkTags';
+import type { TypeOfMode } from './ReactTypeOfMode';
+import type { Lanes } from './ReactFiberLane';
+import type { SuspenseInstance } from './ReactFiberHostConfig';
+import type { OffscreenProps } from './ReactFiberOffscreenComponent';
 
 import invariant from 'shared/invariant';
 import {
@@ -29,8 +29,8 @@ import {
   enableScopeAPI,
   enableBlocksAPI,
 } from 'shared/ReactFeatureFlags';
-import {NoFlags, Placement} from './ReactFiberFlags';
-import {ConcurrentRoot, BlockingRoot} from './ReactRootTags';
+import { NoFlags, Placement } from './ReactFiberFlags';
+import { ConcurrentRoot, BlockingRoot } from './ReactRootTags';
 import {
   IndeterminateComponent,
   ClassComponent,
@@ -59,13 +59,13 @@ import {
 } from './ReactWorkTags';
 import getComponentName from 'shared/getComponentName';
 
-import {isDevToolsPresent} from './ReactFiberDevToolsHook.old';
+import { isDevToolsPresent } from './ReactFiberDevToolsHook.old';
 import {
   resolveClassForHotReloading,
   resolveFunctionForHotReloading,
   resolveForwardRefForHotReloading,
 } from './ReactFiberHotReloading.old';
-import {NoLanes} from './ReactFiberLane';
+import { NoLanes } from './ReactFiberLane';
 import {
   NoMode,
   ConcurrentMode,
@@ -93,7 +93,7 @@ import {
   REACT_LEGACY_HIDDEN_TYPE,
 } from 'shared/ReactSymbols';
 
-export type {Fiber};
+export type { Fiber };
 
 let hasBadMapPolyfill;
 
@@ -215,7 +215,7 @@ function FiberNode(
 //    is faster.
 // 5) It should be easy to port this to a C struct and keep a C implementation
 //    compatible.
-const createFiber = function(
+const createFiber = function (
   tag: WorkTag,
   pendingProps: mixed,
   key: null | string,
@@ -260,6 +260,7 @@ export function resolveLazyComponentTag(Component: Function): WorkTag {
 
 // This is used to create an alternate fiber to do work on.
 export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
+  // diff: pendingProps就是新的element的props
   let workInProgress = current.alternate;
   if (workInProgress === null) {
     // We use a double buffering pooling technique because we know that we'll
@@ -326,9 +327,9 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
     currentDependencies === null
       ? null
       : {
-          lanes: currentDependencies.lanes,
-          firstContext: currentDependencies.firstContext,
-        };
+        lanes: currentDependencies.lanes,
+        firstContext: currentDependencies.firstContext,
+      };
 
   // These will be overridden during the parent's reconciliation
   workInProgress.sibling = current.sibling;
@@ -421,9 +422,9 @@ export function resetWorkInProgress(workInProgress: Fiber, renderLanes: Lanes) {
       currentDependencies === null
         ? null
         : {
-            lanes: currentDependencies.lanes,
-            firstContext: currentDependencies.firstContext,
-          };
+          lanes: currentDependencies.lanes,
+          firstContext: currentDependencies.firstContext,
+        };
 
     if (enableProfilerTimer) {
       // Note: We don't reset the actualTime counts. It's useful to accumulate
@@ -567,8 +568,8 @@ export function createFiberFromTypeAndProps(
         invariant(
           false,
           'Element type is invalid: expected a string (for built-in ' +
-            'components) or a class/function (for composite components) ' +
-            'but got: %s.%s',
+          'components) or a class/function (for composite components) ' +
+          'but got: %s.%s',
           type == null ? type : typeof type,
           info,
         );

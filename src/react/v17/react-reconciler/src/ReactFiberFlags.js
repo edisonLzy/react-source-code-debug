@@ -14,11 +14,13 @@ export const NoFlags = /*                      */ 0b000000000000000000;
 export const PerformedWork = /*                */ 0b000000000000000001;
 
 // You can change the rest (and add more).
+// 插入 effectTag: 2
 export const Placement = /*                    */ 0b000000000000000010;
+// 更新 effectTag: 4
 export const Update = /*                       */ 0b000000000000000100;
 export const PlacementAndUpdate = /*           */ 0b000000000000000110;
 // 删除 effectTag: 8
-export const Deletion = /*                     */ 0b000000000000001000; 
+export const Deletion = /*                     */ 0b000000000000001000;
 export const ContentReset = /*                 */ 0b000000000000010000;
 export const Callback = /*                     */ 0b000000000000100000;
 export const DidCapture = /*                   */ 0b000000000001000000;

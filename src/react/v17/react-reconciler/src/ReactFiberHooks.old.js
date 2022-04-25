@@ -772,6 +772,7 @@ function updateReducer<S, I, A>(
 
     // Mark that the fiber performed work, but only if the new state is
     // different from the current state.
+    // 更新阶段: 如果 newState 和 hook.memoizedState 不相同则将 didReceiveUpdate标记为true
     if (!is(newState, hook.memoizedState)) {
       markWorkInProgressReceivedUpdate();
     }

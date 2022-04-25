@@ -6,6 +6,7 @@ import TasksWithDifferentPriorities from './components/TasksWithDifferentPriorit
 import SchedulerTask from './components/SchedulerTask'
 import Concurrent from './components/ConcurrentInput'
 import Diff from './components/Diff'
+import DiffChildren from './components/Diff/diff-child';
 import PropsDiff from './components/PropsDiff'
 import Hooks from './components/Hooks'
 import EventDemo from './components/EventDemo'
@@ -30,4 +31,4 @@ function App () {
   )
 }
 
-export default MemoryLink
+export default DiffChildren
