@@ -178,7 +178,7 @@ export function scheduleWorkOnParentPath(
     node = node.return;
   }
 }
-
+// context原理: 当 value发生变化时，则进入这个逻辑
 export function propagateContextChange(
   workInProgress: Fiber,
   context: ReactContext<mixed>,
@@ -192,7 +192,6 @@ export function propagateContextChange(
   }
   while (fiber !== null) {
     let nextFiber;
-
     // Visit this fiber.
     const list = fiber.dependencies;
     console.log('list', list);
@@ -207,7 +206,7 @@ export function propagateContextChange(
           (dependency.observedBits & changedBits) !== 0
         ) {
           // Match! Schedule an update on this fiber.
-
+          // context原理: 如果 使用 context时类组件,则创建一个高优先级的ForceUpdate update对象
           if (fiber.tag === ClassComponent) {
             // Schedule a force update on the work-in-progress.
             const update = createUpdate(
@@ -226,6 +225,7 @@ export function propagateContextChange(
           if (alternate !== null) {
             alternate.lanes = mergeLanes(alternate.lanes, renderLanes);
           }
+          // context原理: 给使用 context的fiber的所有父标记为更新
           scheduleWorkOnParentPath(fiber.return, renderLanes);
 
           // Mark the updated lanes on the list, too.
@@ -275,6 +275,7 @@ export function propagateContextChange(
       // No child. Traverse to next sibling.
       nextFiber = fiber;
       while (nextFiber !== null) {
+        // context原理: 回到 Provider对应的fiber节点
         if (nextFiber === workInProgress) {
           // We're back to the root of this subtree. Exit.
           nextFiber = null;
@@ -282,6 +283,7 @@ export function propagateContextChange(
         }
         const sibling = nextFiber.sibling;
         if (sibling !== null) {
+          // context原理: 继续处理 siblings
           // Set the return pointer of the sibling to the work-in-progress fiber.
           sibling.return = nextFiber.return;
           nextFiber = sibling;
@@ -368,6 +370,7 @@ export function readContext<T>(
 
       // This is the first dependency for this component. Create a new list.
       lastContextDependency = contextItem;
+      // context原理: 建立 fiber 和 context对象之间的关系
       currentlyRenderingFiber.dependencies = {
         lanes: NoLanes,
         firstContext: contextItem,

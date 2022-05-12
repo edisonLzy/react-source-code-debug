@@ -391,6 +391,7 @@ function updateMemoComponent(
   updateLanes: Lanes,
   renderLanes: Lanes,
 ): null | Fiber {
+  // memo: 初次渲染阶段
   if (current === null) {
     const type = Component.type;
     if (
@@ -406,6 +407,8 @@ function updateMemoComponent(
       // If this is a plain function component without default props,
       // and with only the default shallow comparison, we upgrade it
       // to a SimpleMemoComponent to allow fast path updates.
+      // memo: 如果 compare === null 并且 isSimpleFunctionComponent返回true
+      // 则标记 fiber.tag 为 SimpleMemoComponent
       workInProgress.tag = SimpleMemoComponent;
       workInProgress.type = resolvedType;
       if (__DEV__) {
@@ -460,6 +463,7 @@ function updateMemoComponent(
       );
     }
   }
+  // memo: 更新阶段
   const currentChild = ((current.child: any): Fiber); // This is always exactly one child
   if (!includesSomeLane(updateLanes, renderLanes)) {
     // This will be the props with resolved defaultProps,
@@ -468,12 +472,14 @@ function updateMemoComponent(
     // Default to shallow comparison
     let compare = Component.compare;
     compare = compare !== null ? compare : shallowEqual;
+    // memo: 对于存在 compare的memo组件
     if (compare(prevProps, nextProps) && current.ref === workInProgress.ref) {
       return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
     }
   }
   // React DevTools reads this flag.
   workInProgress.flags |= PerformedWork;
+  // memo: 继续调和子树
   const newChild = createWorkInProgress(currentChild, nextProps);
   newChild.ref = workInProgress.ref;
   newChild.return = workInProgress;
@@ -523,6 +529,7 @@ function updateSimpleMemoComponent(
       }
     }
   }
+  // memo: sampleMemoComponent 更新阶段
   if (current !== null) {
     const prevProps = current.memoizedProps;
     if (
@@ -559,6 +566,7 @@ function updateSimpleMemoComponent(
       }
     }
   }
+  // memo: sampleMemoComponent 初次渲染
   return updateFunctionComponent(
     current,
     workInProgress,
@@ -956,7 +964,7 @@ function finishClassComponent(
 ) {
   // Refs should update even if shouldComponentUpdate returns false
   markRef(current, workInProgress);
-
+  // render阶段异常处理: 组件是否是 Error Boundaries 
   const didCaptureError = (workInProgress.flags & DidCapture) !== NoFlags;
 
   if (!shouldUpdate && !didCaptureError) {
@@ -973,6 +981,7 @@ function finishClassComponent(
   // Rerender
   ReactCurrentOwner.current = workInProgress;
   let nextChildren;
+  // render阶段异常处理: 如果不存在 getDerivedStateFromError 则 直接返回null, 卸载所有的children
   if (
     didCaptureError &&
     typeof Component.getDerivedStateFromError !== 'function'
@@ -1004,6 +1013,7 @@ function finishClassComponent(
       }
       setIsRendering(false);
     } else {
+      // render阶段异常处理: 存在 则调用 render方法得到新的children
       nextChildren = instance.render();
     }
   }
@@ -2852,6 +2862,7 @@ function updateContextProvider(
   renderLanes: Lanes,
 ) {
   const providerType: ReactProviderType<any> = workInProgress.type;
+  // context原理: 获取 context对象
   const context: ReactContext<any> = providerType._context;
 
   const newProps = workInProgress.pendingProps;
@@ -2874,11 +2885,12 @@ function updateContextProvider(
       checkPropTypes(providerPropTypes, newProps, 'prop', 'Context.Provider');
     }
   }
-
+  // context原理: 设置 context._currentValue 为 Provider的value属性
   pushProvider(workInProgress, newValue);
 
   if (oldProps !== null) {
     const oldValue = oldProps.value;
+    // context原理: 对比 newValue 和 oldValue看是否发生了更新，如果没有则返回 0
     const changedBits = calculateChangedBits(context, newValue, oldValue);
     if (changedBits === 0) {
       // No change. Bailout early if children are the same.
@@ -2898,7 +2910,7 @@ function updateContextProvider(
       propagateContextChange(workInProgress, context, changedBits, renderLanes);
     }
   }
-
+  // context原理: 开始调和子fiber
   const newChildren = newProps.children;
   reconcileChildren(current, workInProgress, newChildren, renderLanes);
   return workInProgress.child;
@@ -2938,6 +2950,7 @@ function updateContextConsumer(
     }
   }
   const newProps = workInProgress.pendingProps;
+  // context原理: 获取 renderProps
   const render = newProps.children;
 
   if (__DEV__) {
@@ -2952,6 +2965,7 @@ function updateContextConsumer(
   }
 
   prepareToReadContext(workInProgress, renderLanes);
+  // context原理: 创建createItem
   const newValue = readContext(context, newProps.unstable_observedBits);
   let newChildren;
   if (__DEV__) {
@@ -3011,7 +3025,7 @@ function bailoutOnAlreadyFinishedWork(
   markSkippedUpdateLanes(workInProgress.lanes);
 
   // Check if the children have any pending work.
-  // 更新阶段: 如果 children 没有需要更新的工作则
+  // 更新阶段: 如果 children 没有需要更新的工作直接跳过整棵子树
   if (!includesSomeLane(renderLanes, workInProgress.childLanes)) {
     // The children don't have any work either. We can skip them.
     // TODO: Once we add back resuming, we should check if the children are
@@ -3302,7 +3316,7 @@ function beginWork(
           return updateOffscreenComponent(current, workInProgress, renderLanes);
         }
       }
-      // 更新阶段: 为什么 rootFiber会走到这个逻辑
+      // 更新阶段: 为什么 rootFiber 会走到这个逻辑
       return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
     } else {
       if ((current.flags & ForceUpdateForLegacySuspense) !== NoFlags) {
@@ -3326,6 +3340,7 @@ function beginWork(
   // the update queue. However, there's an exception: SimpleMemoComponent
   // sometimes bails out later in the begin phase. This indicates that we should
   // move this assignment out of the common path and into each branch.
+  // 更新阶段: 将fiber.lanes 重置为 NoLanes
   workInProgress.lanes = NoLanes;
 
   switch (workInProgress.tag) {
@@ -3410,8 +3425,10 @@ function beginWork(
     case Profiler:
       return updateProfiler(current, workInProgress, renderLanes);
     case ContextProvider:
+      // context原理: 调和 Provider
       return updateContextProvider(current, workInProgress, renderLanes);
     case ContextConsumer:
+      // context原理: 调和 Consumer
       return updateContextConsumer(current, workInProgress, renderLanes);
     case MemoComponent: {
       const type = workInProgress.type;

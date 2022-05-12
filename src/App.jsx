@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import State from './components/State'
 import LanesDemo from './components/LanesDemo'
 import AppSibling from './components/AppSibling'
@@ -12,23 +12,26 @@ import Hooks from './components/Hooks'
 import EventDemo from './components/EventDemo'
 import ContextDemo from './components/Context'
 import MemoryLink from './components/MemeoryLeak'
+import ErrorBoundaries from './components/ErrorBoundaries'
+import MemoDemo from './components/Memo'
 import './App.css'
 
 function App () {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(-1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(()=>{
+    setCount(0);
+  })
+  console.log('render','---------');
   return (
     <div className='App'>
-      <h1
-        onClick={() => {
-          setCount(v => v + 1)
-          setCount(v => v + 1)
-          setCount(v => v + 1)
-        }}
-      >
+      <h1 onClick={()=>{
+        setCount(v=>v+1);
+      }}>
         {count}
       </h1>
     </div>
   )
 }
 
-export default DiffChildren
+export default MemoDemo

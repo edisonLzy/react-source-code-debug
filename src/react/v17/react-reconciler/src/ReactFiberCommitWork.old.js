@@ -378,21 +378,21 @@ function commitHookEffectListMount(tag: number, finishedWork: Fiber) {
 }
 
 function schedulePassiveEffects(finishedWork: Fiber) {
-  // 获取到函数组件的updateQueue
+  //commit: layout阶段 获取到函数组件的updateQueue
   const updateQueue: FunctionComponentUpdateQueue | null = (finishedWork.updateQueue: any);
-  // 获取effect链表
+  //commit: layout阶段 获取effect链表
   const lastEffect = updateQueue !== null ? updateQueue.lastEffect : null;
   if (lastEffect !== null) {
     const firstEffect = lastEffect.next;
     let effect = firstEffect;
-    // 循环effect链表
+    //commit: layout阶段 循环effect链表
     do {
       const { next, tag } = effect;
       if (
         (tag & HookPassive) !== NoHookEffect &&
         (tag & HookHasEffect) !== NoHookEffect
       ) {
-        // 当effect的tag含有HookPassive和HookHasEffect时，菜向数组中push effect
+        // commit: layout阶段 当effect的tag含有HookPassive和HookHasEffect时，才向数组中push effect
         enqueuePendingPassiveHookEffectUnmount(finishedWork, effect);
         enqueuePendingPassiveHookEffectMount(finishedWork, effect);
       }
@@ -455,7 +455,7 @@ export function commitPassiveEffectDurations(
     }
   }
 }
-
+// commit: layout阶段 commitLayoutEffectOnFiber
 function commitLifeCycles(
   finishedRoot: FiberRoot,
   current: Fiber | null,
@@ -478,6 +478,7 @@ function commitLifeCycles(
       ) {
         try {
           startLayoutEffectTimer();
+          // commit: layout 阶段 调用 useLayoutEffect的create
           commitHookEffectListMount(HookLayout | HookHasEffect, finishedWork);
         } finally {
           recordLayoutEffectDuration(finishedWork);
@@ -486,6 +487,7 @@ function commitLifeCycles(
         commitHookEffectListMount(HookLayout | HookHasEffect, finishedWork);
       }
       console.log('finishedWork', finishedWork);
+      // commit: layout 阶段 填充 useEffect需要执行的任务队列
       schedulePassiveEffects(finishedWork);
       return;
     }
@@ -1461,6 +1463,7 @@ function commitWork(current: Fiber | null, finishedWork: Fiber): void {
         ) {
           try {
             startLayoutEffectTimer();
+            // commit: 执行 useLayoutEffect的destroy函数
             commitHookEffectListUnmount(
               HookLayout | HookHasEffect,
               finishedWork,

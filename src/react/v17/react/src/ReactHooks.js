@@ -35,7 +35,7 @@ function resolveDispatcher() {
   );
   return dispatcher;
 }
-
+// context原理: useContext实现原理
 export function useContext<T>(
   Context: ReactContext<T>,
   unstable_observedBits: number | boolean | void,

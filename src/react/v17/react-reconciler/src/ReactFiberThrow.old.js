@@ -81,6 +81,7 @@ function createRootErrorUpdate(
   update.tag = CaptureUpdate;
   // Caution: React DevTools currently depends on this property
   // being called "element".
+  // render阶段异常处理: 渲染 element为null
   update.payload = {element: null};
   const error = errorInfo.value;
   update.callback = () => {
@@ -100,6 +101,7 @@ function createClassErrorUpdate(
   const getDerivedStateFromError = fiber.type.getDerivedStateFromError;
   if (typeof getDerivedStateFromError === 'function') {
     const error = errorInfo.value;
+    // render阶段异常处理: 创建 update.payload
     update.payload = () => {
       logCapturedError(fiber, errorInfo);
       return getDerivedStateFromError(error);
@@ -184,6 +186,7 @@ function throwException(
   rootRenderLanes: Lanes,
 ) {
   // The source fiber did not complete.
+  // render阶段异常: 给发生错误的fiber 添加 Incomplete flag
   sourceFiber.flags |= Incomplete;
   // Its effect list is no longer valid.
   sourceFiber.firstEffect = sourceFiber.lastEffect = null;
@@ -359,6 +362,7 @@ function throwException(
   // as an error.
   renderDidError();
 
+  // render阶段异常处理:创建异常处理对象
   value = createCapturedValue(value, sourceFiber);
   let workInProgress = returnFiber;
   do {
@@ -368,6 +372,7 @@ function throwException(
         workInProgress.flags |= ShouldCapture;
         const lane = pickArbitraryLane(rootRenderLanes);
         workInProgress.lanes = mergeLanes(workInProgress.lanes, lane);
+         // render阶段异常处理: 如果不存在 ErrorBoundaries，则会走到 fiberRoot
         const update = createRootErrorUpdate(workInProgress, errorInfo, lane);
         enqueueCapturedUpdate(workInProgress, update);
         return;
@@ -378,6 +383,7 @@ function throwException(
         const ctor = workInProgress.type;
         const instance = workInProgress.stateNode;
         if (
+          // render阶段异常处理:为什么 这里 是不存在 DidCapture ?
           (workInProgress.flags & DidCapture) === NoFlags &&
           (typeof ctor.getDerivedStateFromError === 'function' ||
             (instance !== null &&
@@ -385,14 +391,18 @@ function throwException(
               !isAlreadyFailedLegacyErrorBoundary(instance)))
         ) {
           workInProgress.flags |= ShouldCapture;
+          // 获取优先级最高的lane
           const lane = pickArbitraryLane(rootRenderLanes);
+          // 将优先级合并到 fiber.lanes
           workInProgress.lanes = mergeLanes(workInProgress.lanes, lane);
           // Schedule the error boundary to re-render using updated state
+          // 创建 errorUpdate对象 update.callback 存放
           const update = createClassErrorUpdate(
             workInProgress,
             errorInfo,
             lane,
           );
+          // 将 errorUpdate对象添加到 Error Boundaries fiber的updateQueue中
           enqueueCapturedUpdate(workInProgress, update);
           return;
         }
@@ -400,6 +410,7 @@ function throwException(
       default:
         break;
     }
+    // render阶段异常处理:从当前fiber找到最近的 Error Boundaries
     workInProgress = workInProgress.return;
   } while (workInProgress !== null);
 }

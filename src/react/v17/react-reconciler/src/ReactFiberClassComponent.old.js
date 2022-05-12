@@ -894,7 +894,7 @@ function mountClassInstance(
     workInProgress.flags |= Update;
   }
 }
-
+// class: 复用 组件的实例
 function resumeMountClassInstance(
   workInProgress: Fiber,
   ctor: any,
@@ -910,6 +910,7 @@ function resumeMountClassInstance(
   const contextType = ctor.contextType;
   let nextContext = emptyContextObject;
   if (typeof contextType === 'object' && contextType !== null) {
+    // context: 读取 context
     nextContext = readContext(contextType);
   } else if (!disableLegacyContext) {
     const nextLegacyUnmaskedContext = getUnmaskedContext(
@@ -951,6 +952,7 @@ function resumeMountClassInstance(
 
   const oldState = workInProgress.memoizedState;
   let newState = (instance.state = oldState);
+  // class: 处理更新
   processUpdateQueue(workInProgress, newProps, instance, renderLanes);
   newState = workInProgress.memoizedState;
   if (
@@ -1092,7 +1094,7 @@ function updateClassInstance(
 
   const oldState = workInProgress.memoizedState;
   let newState = (instance.state = oldState);
-  // 更新阶段: 处理 fiber.updateQueue上保存的更新
+  // 更新阶段: 处理 fiber.updateQueue 上保存的更新
   processUpdateQueue(workInProgress, newProps, instance, renderLanes);
   newState = workInProgress.memoizedState;
 

@@ -234,7 +234,7 @@ if (supportsMutation) {
     // If the update payload indicates that there is a change or if there
     // is a new ref we mark this as an update. All the work is done in commitWork.
     if (updatePayload) {
-      // 更新阶段: 将fiber添加 Update的flags
+      // 更新阶段: 将fiber添加 Update 的flags
       markUpdate(workInProgress);
     }
   };

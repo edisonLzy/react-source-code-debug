@@ -753,7 +753,7 @@ function updateReducer<S, I, A>(
         if (update.eagerReducer === reducer) {
           // If this update was processed eagerly, and its reducer matches the
           // current reducer, we can use the eagerly computed state.
-          // 更新阶段: update.eagerState是在 dispathAction的时候计算的
+          // 更新阶段: update.eagerState是在 dispatchAction的时候计算的
           newState = ((update.eagerState: any): S);
         } else {
           const action = update.action;
@@ -1701,6 +1701,7 @@ function dispatchAction<S, A>(
     didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
   } else {
     if (
+      // 更新阶段: useEffect 中的setState不会走到这里因为 fiber.lanes 不等于 NoLanes
       fiber.lanes === NoLanes &&
       (alternate === null || alternate.lanes === NoLanes)
     ) {

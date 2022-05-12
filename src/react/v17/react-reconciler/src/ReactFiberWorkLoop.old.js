@@ -1112,6 +1112,7 @@ function performSyncWorkOnRoot(root) {
 
   // Before exiting, make sure there's a callback scheduled for the next
   // pending level.
+  // 再发起一次调度,确保低优先级任务执行
   ensureRootIsScheduled(root, now());
 
   return null;
@@ -1412,6 +1413,7 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes) {
 
 function handleError(root, thrownValue): void {
   do {
+    // render阶段异常处理: 当前出现错误的的fiber
     let erroredWork = workInProgress;
     try {
       // Reset module-level state that was set during the render phase.
@@ -1445,7 +1447,6 @@ function handleError(root, thrownValue): void {
         // suspended render.
         stopProfilerTimerIfRunningAndRecordDelta(erroredWork, true);
       }
-
       throwException(
         root,
         erroredWork.return,
@@ -1591,6 +1592,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
       workLoopSync();
       break;
     } catch (thrownValue) {
+      // render阶段异常处理:
       handleError(root, thrownValue);
     }
   } while (true);
@@ -1740,6 +1742,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   }
 
   resetCurrentDebugFiberInDEV();
+  // 当前fiber beginWork结束之后会将 pendingProps 复制给 memoizedProps
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
@@ -1828,9 +1831,11 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
         }
       }
     } else {
+      // render阶段异常处理: 如果unitOfWork是Incomplete则说明抛出了错误
       // This fiber did not complete because something threw. Pop values off
       // the stack without entering the complete phase. If this is a boundary,
       // capture values if possible.
+      // 如果找到了 Error Boundaries fiber 则返回,并作为workInProgress
       const next = unwindWork(completedWork, subtreeRenderLanes);
 
       // Because this fiber did not complete, don't reset its expiration time.
@@ -1861,7 +1866,6 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
         }
         completedWork.actualDuration = actualDuration;
       }
-
       if (returnFiber !== null) {
         // Mark the parent fiber as incomplete and clear its effect list.
         returnFiber.firstEffect = returnFiber.lastEffect = null;
@@ -1962,6 +1966,7 @@ function resetChildLanes(completedWork: Fiber) {
   completedWork.childLanes = newChildLanes;
 }
 
+// commit: commit阶段是绝对同步的(ImmediateSchedulerPriority)
 function commitRoot(root) {
   const renderPriorityLevel = getCurrentPriorityLevel();
   runWithPriority(
@@ -1970,7 +1975,7 @@ function commitRoot(root) {
   );
   return null;
 }
-
+// commit: commit阶段实现
 function commitRootImpl(root, renderPriorityLevel) {
   do {
     // `flushPassiveEffects` will call `flushSyncUpdateQueue` at the end, which
@@ -2108,7 +2113,7 @@ function commitRootImpl(root, renderPriorityLevel) {
         }
       } else {
         try {
-          // commit阶段: 
+          // commit: beforeMutation
           commitBeforeMutationEffects();
         } catch (error) {
           invariant(nextEffect !== null, 'Should be working on an effect.');
@@ -2146,7 +2151,7 @@ function commitRootImpl(root, renderPriorityLevel) {
         }
       } else {
         try {
-          // commit: 根据 effectList 更新真实DOM
+          // commit: 重置ref 并且 根据 effectList 更新真实DOM 
           commitMutationEffects(root, renderPriorityLevel);
         } catch (error) {
           invariant(nextEffect !== null, 'Should be working on an effect.');
@@ -2171,6 +2176,7 @@ function commitRootImpl(root, renderPriorityLevel) {
     // the host tree after it's been mutated. The idiomatic use case for this is
     // layout, but class component lifecycles also fire here for legacy reasons.
     nextEffect = firstEffect;
+    // commit: 如果存在 effectList 则处理
     do {
       if (__DEV__) {
         invokeGuardedCallback(null, commitLayoutEffects, null, root, lanes);
@@ -2182,6 +2188,7 @@ function commitRootImpl(root, renderPriorityLevel) {
         }
       } else {
         try {
+          // commit: layout阶段
           commitLayoutEffects(root, lanes);
         } catch (error) {
           invariant(nextEffect !== null, 'Should be working on an effect.');
@@ -2367,7 +2374,7 @@ function commitBeforeMutationEffects() {
     const flags = nextEffect.flags;
     if ((flags & Snapshot) !== NoFlags) {
       setCurrentDebugFiberInDEV(nextEffect);
-
+      // commit: ClassComponent将执行 getSnapshotBeforeUpdate
       commitBeforeMutationEffectOnFiber(current, nextEffect);
 
       resetCurrentDebugFiberInDEV();
@@ -2375,14 +2382,17 @@ function commitBeforeMutationEffects() {
     if ((flags & Passive) !== NoFlags) {
       // If there are passive effects, schedule a callback to flush at
       // the earliest opportunity.
+      // commit: 避免多次调度
       if (!rootDoesHavePassiveEffects) {
         rootDoesHavePassiveEffects = true;
+      // commit: 以 NormalSchedulerPriority 优先级 异步调度 flushPassiveEffects
         scheduleCallback(NormalSchedulerPriority, () => {
           flushPassiveEffects();
           return null;
         });
       }
     }
+    // commit: while处理整个 effectList
     nextEffect = nextEffect.nextEffect;
   }
 }
@@ -2400,7 +2410,7 @@ function commitMutationEffects(
     if (flags & ContentReset) {
       commitResetTextContent(nextEffect);
     }
-
+    // commit: mutation阶段 重置 ref === null
     if (flags & Ref) {
       const current = nextEffect.alternate;
       if (current !== null) {
@@ -2456,12 +2466,12 @@ function commitMutationEffects(
       }
       case Update: {
         const current = nextEffect.alternate;
-        // commit阶段: 处理 被标记为 Update 的fiber
+        // commit阶段: mutation阶段 处理被标记为 Update 的fiber
         commitWork(current, nextEffect);
         break;
       }
       case Deletion: {
-        // commit阶段: 处理 被标记为 Deletion 的fiber
+        // commit阶段: mutation阶段 处理被标记为 Deletion 的fiber
         commitDeletion(root, nextEffect, renderPriorityLevel);
         break;
       }
@@ -2600,7 +2610,7 @@ function invokePassiveEffectCreate(effect: HookEffect): void {
   const create = effect.create;
   effect.destroy = create();
 }
-
+// commit: 执行 effect
 function flushPassiveEffectsImpl() {
   if (rootWithPendingPassiveEffects === null) {
     return false;
@@ -2642,12 +2652,14 @@ function flushPassiveEffectsImpl() {
   // Layout effects have the same constraint.
 
   // First pass: Destroy stale passive effects.
+  // commit: 先执行 useEffect的destroy函数
   const unmountEffects = pendingPassiveHookEffectsUnmount;
   pendingPassiveHookEffectsUnmount = [];
   for (let i = 0; i < unmountEffects.length; i += 2) {
     const effect = ((unmountEffects[i]: any): HookEffect);
     const fiber = ((unmountEffects[i + 1]: any): Fiber);
     const destroy = effect.destroy;
+    // commit: destroy 将在后续使用执行create的返回值重新赋值
     effect.destroy = undefined;
 
     if (__DEV__) {
@@ -2702,6 +2714,7 @@ function flushPassiveEffectsImpl() {
     }
   }
   // Second pass: Create new passive effects.
+  // commit: 先执行 useEffect的 create 函数
   const mountEffects = pendingPassiveHookEffectsMount;
   pendingPassiveHookEffectsMount = [];
   for (let i = 0; i < mountEffects.length; i += 2) {
@@ -2736,6 +2749,7 @@ function flushPassiveEffectsImpl() {
         ) {
           try {
             startPassiveEffectTimer();
+            // commit: 重新赋值 destory函数
             effect.destroy = create();
           } finally {
             recordPassiveEffectDuration(fiber);
@@ -2744,6 +2758,7 @@ function flushPassiveEffectsImpl() {
           effect.destroy = create();
         }
       } catch (error) {
+        // commit阶段异常处理: 捕获 useEffect create中发生的错误
         invariant(fiber !== null, 'Should be working on an effect.');
         captureCommitPhaseError(fiber, error);
       }
@@ -2867,16 +2882,20 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
           !isAlreadyFailedLegacyErrorBoundary(instance))
       ) {
         const errorInfo = createCapturedValue(error, sourceFiber);
+        // commit阶段异常处理: 创建更新对象
         const update = createClassErrorUpdate(
           fiber,
           errorInfo,
           (SyncLane: Lane),
         );
+        // commit阶段异常处理: 更新对象添加到 updateQueue中
         enqueueUpdate(fiber, update);
         const eventTime = requestEventTime();
+        // commit阶段异常处理: 找到 root 从根节点开始调度更新
         const root = markUpdateLaneFromFiberToRoot(fiber, (SyncLane: Lane));
         if (root !== null) {
           markRootUpdated(root, SyncLane, eventTime);
+          // commit阶段异常处理: 开始调度
           ensureRootIsScheduled(root, eventTime);
           schedulePendingInteractions(root, SyncLane);
         } else {

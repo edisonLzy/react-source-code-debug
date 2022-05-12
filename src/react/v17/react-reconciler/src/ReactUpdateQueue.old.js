@@ -259,11 +259,9 @@ export function enqueueCapturedUpdate<State>(
           const clone: Update<State> = {
             eventTime: update.eventTime,
             lane: update.lane,
-
             tag: update.tag,
             payload: update.payload,
             callback: update.callback,
-
             next: null,
           };
           if (newLast === null) {
@@ -515,6 +513,7 @@ export function processUpdateQueue<State>(
         }
 
         // Process this update.
+        // render阶段异常处理: 如果update.tag === CaptureUpdate ，则会调用 getStateFromUpdate 得到新的 state
         newState = getStateFromUpdate(
           workInProgress,
           queue,
@@ -523,6 +522,7 @@ export function processUpdateQueue<State>(
           props,
           instance,
         );
+         // render阶段异常处理: callback 将在 在commit阶段进行调度
         const callback = update.callback;
         if (callback !== null) {
           workInProgress.flags |= Callback;
