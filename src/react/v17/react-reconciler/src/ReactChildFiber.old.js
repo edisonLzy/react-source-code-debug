@@ -820,7 +820,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     let lastPlacedIndex = 0;
     let newIdx = 0;
     let nextOldFiber = null;
-    // diff: 遍历新的react element
+    // diff: 第一层for循环 有先处理节点更新的情况
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
         nextOldFiber = oldFiber;
@@ -868,7 +868,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       previousNewFiber = newFiber;
       oldFiber = nextOldFiber;
     }
-    // diff: 处理节点删除的情况
+    // diff: 删除 current 上剩余的fiber节点
     if (newIdx === newChildren.length) {
       // We've reached the end of the new children. We can delete the rest.
       deleteRemainingChildren(returnFiber, oldFiber);
@@ -918,6 +918,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             // current, that means that we reused the fiber. We need to delete
             // it from the child list so that we don't add it to the deletion
             // list.
+            // diff: 如果 oldFiber复用成功, 则从 existingChildren 删除对应的fiber节点
             existingChildren.delete(
               newFiber.key === null ? newIdx : newFiber.key,
             );

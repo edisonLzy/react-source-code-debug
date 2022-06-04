@@ -90,7 +90,8 @@ export function createEventListenerWrapper(
     targetContainer,
   );
 }
-
+// 合成事件机制: 根据不同的事件名称，绑定不同事件优先级的事件处理函数
+// 它们做的事情都是一样的，以各自的事件优先级去执行真正的事件处理函数
 export function createEventListenerWrapperWithPriority(
   targetContainer: EventTarget,
   domEventName: DOMEventName,
@@ -152,6 +153,7 @@ function dispatchUserBlockingUpdate(
     try {
       // TODO: Double wrapping is necessary while we decouple Scheduler priority.
       setCurrentUpdateLanePriority(InputContinuousLanePriority);
+      // 合成事件机制: 使用 scheduler 的 runWithPriority的方法,实现以特定事件优先级执行事件处理函数
       runWithPriority(
         UserBlockingPriority,
         dispatchEvent.bind(

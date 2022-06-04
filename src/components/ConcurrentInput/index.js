@@ -21,7 +21,6 @@ class Concurrent extends React.Component {
           <div key={index}>{this.state.text}</div>
         )}
       </div>
-
     </>
   }
 }

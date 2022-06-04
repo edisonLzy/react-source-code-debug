@@ -23,11 +23,27 @@ export default function Diff() {
                 </li>
             })}
         </ul>
-
         <button onClick={() => {
             setList(v => {
                 return [...v].reverse()
             })
         }}>shuffle</button>
+        
+        <button onClick={()=>{
+            setList(v=>{
+                const [ item,...rest] = v;
+                return [{
+                    ...item,
+                    label:'🍎🍎',},...rest]
+            })
+        }}>update label</button>
+
+               
+        <button onClick={()=>{
+            setList(v=>{
+                const [a,b,c] = v;
+                return [a,b]
+            })
+        }}>delete label</button>
     </div>
 }

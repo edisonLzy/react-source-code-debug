@@ -285,7 +285,7 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
       workInProgress._debugOwner = current._debugOwner;
       workInProgress._debugHookTypes = current._debugHookTypes;
     }
-
+    // 建立 alternate关系
     workInProgress.alternate = current;
     current.alternate = workInProgress;
   } else {

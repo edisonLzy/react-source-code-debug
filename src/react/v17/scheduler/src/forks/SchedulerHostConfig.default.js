@@ -196,10 +196,12 @@ if (
           hasTimeRemaining,
           currentTime,
         );
+        // scheduler: 如果任务执行完了,则初始化 messageChannel的状态
         if (!hasMoreWork) {
           isMessageLoopRunning = false;
           scheduledHostCallback = null;
         } else {
+          // scheduler: 如果还有任务没有执行完, 则继续请求下一个时间片
           // If there's more work, schedule the next message event at the end
           // of the preceding one.
           port.postMessage(null);
@@ -221,11 +223,12 @@ if (
   const channel = new MessageChannel();
   const port = channel.port2;
   channel.port1.onmessage = performWorkUntilDeadline;
-
+  // scheduler: scheduledHostCallback 就是传入的flushWork, 它是一个全局变量
   requestHostCallback = function(callback) {
     scheduledHostCallback = callback;
     if (!isMessageLoopRunning) {
       isMessageLoopRunning = true;
+      // scheduler: 调用 postMessage 在消息队列中放入 onmessage 注册的宏任务
       port.postMessage(null);
     }
   };

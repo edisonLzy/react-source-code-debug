@@ -77,16 +77,18 @@ var isPerformingWork = false;
 
 var isHostCallbackScheduled = false;
 var isHostTimeoutScheduled = false;
-
+// scheduler: 根据当前时间片执行的时间,检查是否有延迟任务需要执行(也就是需要转移到taskQueue)
 function advanceTimers(currentTime) {
   // Check for tasks that are no longer delayed and add them to the queue.
   // 检查过期任务队列中不应再被推迟的，放到taskQueue中
   let timer = peek(timerQueue);
   while (timer !== null) {
+    // scheduler: callback === null 说明任务已经被取消
     if (timer.callback === null) {
       // Timer was cancelled.
       pop(timerQueue);
     } else if (timer.startTime <= currentTime) {
+      // scheduler: 说明已经到了延迟任务的执行时间,将其从延迟队列中转移到任务队列中
       // Timer fired. Transfer to the task queue.
       pop(timerQueue);
       timer.sortIndex = timer.expirationTime;
@@ -97,8 +99,10 @@ function advanceTimers(currentTime) {
       }
     } else {
       // Remaining timers are pending.
+      // scheduler: 如果 timer.startTime > currentTime则说明,堆顶的元素(也就是最先到达执行时间的延迟任务都大于 当前时间片执行的时间),所以timer队列中的剩下的所有任务都大于 currentTime
       return;
     }
+    // scheduler: 继续获取下一个堆顶元素
     timer = peek(timerQueue);
   }
 }
@@ -124,7 +128,7 @@ function handleTimeout(currentTime) {
     }
   }
 }
-
+// scheduler: flushWork 将作为 scheduledHostCallback 被执行
 function flushWork(hasTimeRemaining, initialTime) {
   if (enableProfiling) {
     markSchedulerUnsuspended(initialTime);
@@ -154,6 +158,7 @@ function flushWork(hasTimeRemaining, initialTime) {
       }
     } else {
       // No catch in prod code path.
+      // scheduler: 如果说还有任务没有执行完, workLoop返回值是个函数
       return workLoop(hasTimeRemaining, initialTime);
     }
   } finally {
@@ -166,9 +171,11 @@ function flushWork(hasTimeRemaining, initialTime) {
     }
   }
 }
-
+// scheduler: workLoop 核心实现
+// initialTime: 是当前时间片开始的时间
 function workLoop(hasTimeRemaining, initialTime) {
   let currentTime = initialTime;
+  // 根据当前时间片执行的时间,检查是否有延迟任务需要执行(也就是需要转移到taskQueue)
   advanceTimers(currentTime);
   // 获取taskQueue中最紧急的任务
   currentTask = peek(taskQueue);
@@ -181,15 +188,17 @@ function workLoop(hasTimeRemaining, initialTime) {
       (!hasTimeRemaining || shouldYieldToHost())
     ) {
       // This currentTask hasn't expired, and we've reached the deadline.
-      // 当前任务没有过期，但是已经到了时间片的末尾，需要中断循环
+      // scheduler: 当前任务没有过期，但是已经到了时间片的末尾(也就是没有剩余时间了)，需要中断循环
       break;
     }
     const callback = currentTask.callback;
     if (typeof callback === 'function') {
       currentTask.callback = null;
       currentPriorityLevel = currentTask.priorityLevel;
+      // scheduler: 检查任务是否已经过期
       const didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
-      markTaskRun(currentTask, currentTime);
+      // markTaskRun(currentTask, currentTime); 
+      // scheduler: 根据 任务的返回值表示下一个需要执行的任务
       const continuationCallback = callback(didUserCallbackTimeout);
       currentTime = getCurrentTime();
       if (typeof continuationCallback === 'function') {
@@ -213,8 +222,10 @@ function workLoop(hasTimeRemaining, initialTime) {
       }
       advanceTimers(currentTime);
     } else {
+      // 说明任务有可能被取消了
       pop(taskQueue);
     }
+    // 继续获取 taskQueue中堆顶的任务对象执行
     currentTask = peek(taskQueue);
   }
   // Return whether there's additional work
@@ -232,7 +243,7 @@ function workLoop(hasTimeRemaining, initialTime) {
     return false;
   }
 }
-
+// 已指定的优先级来运行 eventHandler 函数
 function unstable_runWithPriority(priorityLevel, eventHandler) {
   switch (priorityLevel) {
     case ImmediatePriority:
@@ -246,6 +257,7 @@ function unstable_runWithPriority(priorityLevel, eventHandler) {
   }
 
   var previousPriorityLevel = currentPriorityLevel;
+  // 优先级机制: 记录优先级到Scheduler内部的变量里
   currentPriorityLevel = priorityLevel;
 
   try {
@@ -294,7 +306,7 @@ function unstable_wrapCallback(callback) {
     }
   };
 }
-
+// scheduler 核心实现
 function unstable_scheduleCallback(priorityLevel, callback, options) {
   var currentTime = getCurrentTime();
   // 确定当前时间 startTime 和延迟更新时间 timeout
@@ -353,7 +365,9 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
 
   if (startTime > currentTime) {
     // This is a delayed task.
+    // scheduler: 如果是延迟任务 ,则根据任务开始时间排序
     newTask.sortIndex = startTime;
+    // scheduler: 将延迟任务放到 timerQueue 中
     push(timerQueue, newTask);
     if (peek(taskQueue) === null && newTask === peek(timerQueue)) {
       // All tasks are delayed, and this is the task with the earliest delay.
@@ -369,6 +383,7 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
       requestHostTimeout(handleTimeout, startTime - currentTime);
     }
   } else {
+    // scheduler: 如果是过期任务则按照 过期时间排序
     newTask.sortIndex = expirationTime;
     // taskQueue是最小堆，而堆内又是根据sortIndex（也就是expirationTime）进行排序的。
     // 可以保证优先级最高（expirationTime最小）的任务排在前面被优先处理。

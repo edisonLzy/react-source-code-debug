@@ -34,4 +34,4 @@ function App () {
   )
 }
 
-export default MemoDemo
+export default Diff

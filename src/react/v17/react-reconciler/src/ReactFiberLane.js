@@ -9,6 +9,17 @@
 
 import type {FiberRoot, ReactPriorityLevel} from './ReactInternalTypes';
 
+import invariant from 'shared/invariant';
+
+import {
+  ImmediatePriority as ImmediateSchedulerPriority,
+  UserBlockingPriority as UserBlockingSchedulerPriority,
+  NormalPriority as NormalSchedulerPriority,
+  LowPriority as LowSchedulerPriority,
+  IdlePriority as IdleSchedulerPriority,
+  NoPriority as NoSchedulerPriority,
+} from './SchedulerWithReactIntegration.new';
+
 export opaque type LanePriority =
   | 0
   | 1
@@ -31,17 +42,6 @@ export opaque type LanePriority =
 export opaque type Lanes = number;
 export opaque type Lane = number;
 export opaque type LaneMap<T> = Array<T>;
-
-import invariant from 'shared/invariant';
-
-import {
-  ImmediatePriority as ImmediateSchedulerPriority,
-  UserBlockingPriority as UserBlockingSchedulerPriority,
-  NormalPriority as NormalSchedulerPriority,
-  LowPriority as LowSchedulerPriority,
-  IdlePriority as IdleSchedulerPriority,
-  NoPriority as NoSchedulerPriority,
-} from './SchedulerWithReactIntegration.new';
 
 export const SyncLanePriority: LanePriority = 15;
 export const SyncBatchedLanePriority: LanePriority = 14;
@@ -262,7 +262,7 @@ export function lanePriorityToSchedulerPriority(
       );
   }
 }
-
+// 优先级: 根据更新优先级 计算任务优先级
 export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
   // 该函数从root.pendingLanes中找出优先级最高的lane
 

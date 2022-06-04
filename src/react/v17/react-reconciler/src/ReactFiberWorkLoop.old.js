@@ -388,7 +388,7 @@ export function requestEventTime() {
 export function getCurrentTime() {
   return now();
 }
-
+// 优先级: 根据事件优先级计算出更新优先级
 export function requestUpdateLane(fiber: Fiber): Lane {
   // Special cases
   const mode = fiber.mode;
@@ -721,6 +721,8 @@ function markUpdateLaneFromFiberToRoot(
 // of the existing task is the same as the priority of the next level that the
 // root has work on. This function is called on every update, and right before
 // exiting a task.
+// 优先级: 计算本次更新任务的任务优先级
+// concurrent模式下的更新函数
 function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
   const existingCallbackNode = root.callbackNode;
 
@@ -729,6 +731,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
   markStarvedLanesAsExpired(root, currentTime);
 
   // Determine the next lanes to work on, and their priority.
+  // 优先级: 计算在本次更新中应该处理的这批lanes
   const nextLanes = getNextLanes(
     root,
     root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes,
@@ -766,7 +769,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
     }
     // The priority changed. Cancel the existing callback. We'll schedule a new
     // one below.
-    // 取消掉已有任务
+    // 说明有高优先级任务插队则取消掉已有任务
     cancelCallback(existingCallbackNode);
   }
 
@@ -809,6 +812,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 
 // This is the entry point for every concurrent task, i.e. anything that
 // goes through Scheduler.
+// performConcurrentWorkOnRoot concurrent模式下的任务更新函数
 function performConcurrentWorkOnRoot(root) {
   // Since we know we're in a React event, we can clear the current
   // event time. The next update will compute a new event time.
@@ -893,7 +897,7 @@ function performConcurrentWorkOnRoot(root) {
       ensureRootIsScheduled(root, now());
       throw fatalError;
     }
-
+    // concurrent任务调度: 说明 WIP树已经构建完毕,准备进入 commit阶段
     // We now have a consistent tree. The next step is either to commit it,
     // or, if something suspended, wait to commit it after a timeout.
     const finishedWork: Fiber = (root.current.alternate: any);
@@ -903,10 +907,13 @@ function performConcurrentWorkOnRoot(root) {
   }
   ensureRootIsScheduled(root, now());
   if (root.callbackNode === originalCallbackNode) {
+    // concurrent任务调度:说明在 ensureRootIsScheduled 中没有产生新的更新任务, 说明命中了优先级相同直接返回了
     // The task node scheduled for this root is the same one that's
     // currently executed. Need to return a continuation.
+    // concurrent任务调度: 返回 performConcurrentWorkOnRoot 作为 continuationCallback 说明任务还没有执行完毕,被时间片打断了
     return performConcurrentWorkOnRoot.bind(null, root);
   }
+  // concurrent任务调度: 返回 null 说明当前任务已经执行完毕了
   return null;
 }
 
@@ -1659,12 +1666,6 @@ function renderRootConcurrent(root: FiberRoot, lanes: Lanes) {
 
   const prevInteractions = pushInteractions(root);
 
-  if (__DEV__) {
-    if (enableDebugTracing) {
-      logRenderStarted(lanes);
-    }
-  }
-
   if (enableSchedulingProfiler) {
     markRenderStarted(lanes);
   }
@@ -1701,6 +1702,7 @@ function renderRootConcurrent(root: FiberRoot, lanes: Lanes) {
     if (enableSchedulingProfiler) {
       markRenderYielded();
     }
+    // RootIncomplete是一个标识位
     return RootIncomplete;
   } else {
     // Completed the tree.
